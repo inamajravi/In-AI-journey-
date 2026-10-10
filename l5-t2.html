@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Build-vs-buy tradeoffs for enterprise AI tooling — Level 5</title>
+<style>
+:root{--bg:#f7f6f3;--fg:#1c1b19;--card:#ffffff;--border:#e3e0d8;--accent:#7a5cff;--accent2:#1a936f;--muted:#6b6860;--locked:#c9c5b8;--code:#efede7;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#15130f;--fg:#eeece6;--card:#1f1c17;--border:#332f27;--accent:#a58bff;--accent2:#4fd3a3;--muted:#a39d8e;--locked:#4a453b;--code:#2a261f;}}
+:root[data-theme="dark"]{--bg:#15130f;--fg:#eeece6;--card:#1f1c17;--border:#332f27;--accent:#a58bff;--accent2:#4fd3a3;--muted:#a39d8e;--locked:#4a453b;--code:#2a261f;}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.55;}
+.wrap{max-width:680px;margin:0 auto;padding:max(24px,env(safe-area-inset-top)) 18px max(60px,env(safe-area-inset-bottom));}
+h1{font-size:1.35rem;margin:0 0 4px;}
+h2{font-size:1rem;margin:22px 0 8px;color:var(--accent);text-transform:uppercase;letter-spacing:.03em;}
+.sub{color:var(--muted);font-size:.9rem;margin:0 0 18px;}
+a{color:var(--accent);text-decoration:none;}
+.crumbs{font-size:.82rem;color:var(--muted);margin-bottom:12px;}
+.progress-outer{height:8px;border-radius:5px;background:var(--border);overflow:hidden;margin-bottom:20px;}
+.progress-inner{height:100%;background:var(--accent);transition:width .3s;width:0;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;color:var(--fg);}
+.card.locked{opacity:.55;}
+.badge{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-size:.82rem;font-weight:700;flex-shrink:0;}
+.card.locked .badge{background:var(--locked);}
+.card.done .badge{background:var(--accent2);}
+.card .info{flex:1;}
+.card .name{font-weight:600;font-size:.97rem;}
+.card .pct{font-size:.8rem;color:var(--muted);}
+.topicrow{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 14px;margin-bottom:10px;}
+.topicrow input{width:18px;height:18px;flex-shrink:0;accent-color:var(--accent2);}
+.topicrow a{flex:1;font-size:.95rem;font-weight:500;}
+.topicrow.checked a{color:var(--muted);text-decoration:line-through;}
+ul.pts{padding-left:18px;margin:6px 0;}
+ul.pts li{margin:7px 0;font-size:.95rem;}
+ol.chk{padding-left:20px;margin:6px 0;}
+ol.chk li{margin:6px 0;font-size:.95rem;}
+.box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;font-size:.95rem;}
+pre{background:var(--code);border:1px solid var(--border);border-radius:10px;padding:12px;overflow-x:auto;font-size:.8rem;line-height:1.45;}
+.gate{margin-top:14px;padding:12px 14px;border-radius:10px;background:color-mix(in srgb, var(--accent2) 12%, transparent);border:1px solid color-mix(in srgb, var(--accent2) 35%, transparent);font-size:.9rem;}
+.gate b{color:var(--accent2);}
+.donebar{margin-top:22px;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:var(--card);border:1px solid var(--border);font-weight:600;cursor:pointer;}
+.donebar input{width:20px;height:20px;accent-color:var(--accent2);}
+.lockmsg{padding:14px 0;font-size:.92rem;color:var(--muted);}
+.nav{display:flex;justify-content:space-between;margin-top:24px;font-size:.9rem;flex-wrap:wrap;gap:10px;}
+footer{color:var(--muted);font-size:.8rem;margin-top:24px;}
+button.reset{background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:6px 10px;font-size:.78rem;cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="crumbs"><a href="index.html">Overview</a> › <a href="level-5.html">Level 5</a> › Topic 2</div>
+<h1>Build-vs-buy tradeoffs for enterprise AI tooling</h1>
+<p class="sub">Level 5 · Topic 2 of 5</p>
+<div id="lockbox"></div>
+<div id="content">
+<h2>Why it matters</h2>
+<div class="box">Many architect decisions are about what not to build. A clear framework makes your recommendations credible.</div>
+<h2>Core concepts</h2>
+<ul class="pts">
+<li><strong>Criteria</strong>: strategic differentiation, time to value, integration effort, security and compliance fit, total cost of ownership, vendor lock-in and exit cost.</li>
+<li><strong>Buy for commodity</strong>: generic chat, summarisation, standard observability. <strong>Build for differentiation</strong>: domain logic like screening rules, proprietary data workflows.</li>
+<li><strong>Hybrid is common</strong>: buy infrastructure, build the domain layer on top behind clean interfaces.</li>
+<li><strong>Hidden costs</strong>: evaluation, maintenance, on-call, security review and keeping up with model changes.</li>
+<li><strong>Exit plan</strong>: decide up front how you would leave a vendor, and test it lightly.</li>
+</ul>
+<h2>Hands-on exercise</h2>
+<div class="box">Pick one capability (e.g. LLM observability). Score build vs two vendor options against the criteria above, estimate 12-month cost for each, and write a one-page recommendation including the risks.</div>
+<h2>Self-check</h2>
+<ol class="chk">
+<li>What is truly differentiating in your domain?</li>
+<li>What is the exit cost of each option?</li>
+<li>Which hidden costs did you include for &#x27;build&#x27;?</li>
+</ol>
+<label class="donebar"><input type="checkbox" id="doneBox"> Mark this topic complete</label>
+</div>
+<div class="nav"><a href="l5-t1.html">← Previous topic</a><a href="level-5.html">Level 5 list</a><a href="l5-t3.html">Next topic →</a></div>
+<script>
+const STORAGE_KEY = "ai-architect-tracker-v1";
+const TASK_COUNTS = [4, 5, 6, 3, 5];
+function freshChecks(){ return TASK_COUNTS.map(n => Array(n).fill(false)); }
+function loadState(){
+  let state = {};
+  try{ const raw = localStorage.getItem(STORAGE_KEY); state = raw ? JSON.parse(raw) : {}; }catch(e){ state = {}; }
+  if(!state.checks || state.checks.length !== TASK_COUNTS.length) state.checks = freshChecks();
+  state.checks = state.checks.map((arr,i)=> Array.from({length:TASK_COUNTS[i]}, (_,j)=> !!(arr && arr[j])));
+  return state;
+}
+function saveState(state){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+function levelComplete(state,i){ return state.checks[i].length>0 && state.checks[i].every(Boolean); }
+function levelUnlocked(state,i){ return i===0 || levelComplete(state,i-1); }
+const LI = 4, TI = 1;
+
+function render(){
+  const state = loadState();
+  const unlocked = levelUnlocked(state, LI);
+  document.getElementById("content").style.display = unlocked ? "" : "none";
+  const lb = document.getElementById("lockbox"); lb.innerHTML = "";
+  if(!unlocked){
+    const p = document.createElement("p"); p.className = "lockmsg";
+    p.textContent = "This level is locked until every topic in Level "+LI+" is ticked off. ";
+    const a = document.createElement("a"); a.href = "level-"+LI+".html"; a.textContent = "Go to Level "+LI;
+    p.appendChild(a); lb.appendChild(p); return;
+  }
+  document.getElementById("doneBox").checked = state.checks[LI][TI];
+}
+document.getElementById("doneBox").addEventListener("change", (e)=>{
+  const state = loadState(); state.checks[LI][TI] = e.target.checked; saveState(state);
+});
+render();
+</script>
+</div>
+</body>
+</html>
